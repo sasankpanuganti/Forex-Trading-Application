@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from '@/hooks/use-toast';
+import { saveDemoUserToFirestore } from '@/lib/firestoreService';
 
 const currencies = [
   { code: 'USD', name: 'US Dollar', symbol: '$' },
@@ -43,21 +44,7 @@ const Auth = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    try {
-      const demo = localStorage.getItem('demo_user');
-      if (demo) {
-        const parsed = JSON.parse(demo);
-        if (parsed.userType === 'organization') {
-          navigate('/org-dashboard');
-          return;
-        }
-        navigate('/dashboard');
-      }
-    } catch (err) {
-      // ignore
-    }
-  }, [navigate]);
+  // Do not auto-redirect on mount. After signup the user will be sent to the login tab.
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,22 +105,34 @@ const Auth = () => {
   // Navigate to dashboard - placeholder
       // Save demo user settings in localStorage for demo purposes
   const basicAmt = Number(String(formData.basicTradeAmount).replace(/[^0-9.-]/g, '')) || 0;
-      localStorage.setItem('demo_user', JSON.stringify({
+      const demoUser = {
         name: formData.name,
         email: formData.email,
         baseCurrency: formData.baseCurrency,
         basicTradeAmount: basicAmt,
         userType: formData.userType,
         organizationName: formData.organizationName || null
-      }));
-      // Redirect based on role
-      if (formData.userType === 'organization') {
-        navigate('/org-dashboard');
-      } else {
-        navigate('/dashboard');
-      }
+      };
+      localStorage.setItem('demo_user', JSON.stringify(demoUser));
+      // best-effort save to Firestore (non-blocking)
+      try { saveDemoUserToFirestore(demoUser).then(r => { if (!r.ok) console.warn('firestore save failed', r); }); } catch (e) { console.warn('firestore call error', e); }
+      // After signup, set a session flag so the login tab can show a message, then navigate to login.
+      try { sessionStorage.setItem('signup_success', '1'); } catch (e) { /* ignore */ }
+      navigate('/auth');
     }, 1000);
   };
+
+  // show a transient message on the login tab if user was redirected from signup
+  const [showSignupMessage, setShowSignupMessage] = useState(false);
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem('signup_success')) {
+        setShowSignupMessage(true);
+        sessionStorage.removeItem('signup_success');
+        setTimeout(() => setShowSignupMessage(false), 6000);
+      }
+    } catch (e) { /* ignore */ }
+  }, []);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">

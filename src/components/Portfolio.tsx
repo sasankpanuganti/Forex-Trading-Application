@@ -11,6 +11,8 @@ interface PortfolioData {
   todayProfit: number;
   openPositions: number;
   totalTrades: number;
+  totalCapacity?: number;
+  deployedCapital?: number;
 }
 
 interface TradeItem {
@@ -46,6 +48,17 @@ export const Portfolio = ({ portfolio, minTradeAmount = 1000, trades = [] }: Por
         <CardDescription>Your trading account summary</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Capacity */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Total Trading Capacity</span>
+            <span className="font-mono text-lg font-bold">{(portfolio.totalCapacity ?? 10000000).toLocaleString()} {portfolio.baseCurrency}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Deployed Capital</span>
+            <span className="font-mono text-sm font-bold">{(portfolio.deployedCapital ?? 125000).toLocaleString()} {portfolio.baseCurrency}</span>
+          </div>
+        </div>
         {/* Account Balance */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">

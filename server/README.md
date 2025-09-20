@@ -1,3 +1,12 @@
+Server helpers (static predictors)
+=================================
+
+This folder contains two standalone demo artifacts:
+
+- `static_predictor.js` — a tiny Node module that exports a `predict` function. It returns a static/deterministic fake recommendation for testing.
+- `python_model/` — a tiny FastAPI example that trains a toy RandomForest on synthetic price data and exposes `/predict` and `/train`. See `python_model/README.md` for details.
+
+These files are intentionally static examples and are not imported or wired into the main frontend app.
 Agent Server
 ------------
 

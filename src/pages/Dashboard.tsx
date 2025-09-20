@@ -13,7 +13,8 @@ import { TradeBlotter } from '@/components/TradeBlotter';
 import { RealTimeData } from '@/components/RealTimeData';
 import { AIRecommendationModal } from '@/components/AIRecommendationModal';
 import { toast } from '@/hooks/use-toast';
-import { TrendingUp, TrendingDown, Activity, DollarSign, BarChart3, Settings, Brain } from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity, DollarSign, BarChart3, Settings, Brain, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const currencyPairs = [
   'EUR/USD', 'GBP/USD', 'USD/JPY', 'USD/CHF', 'AUD/USD', 'USD/CAD', 'NZD/USD',
@@ -57,6 +58,8 @@ const Dashboard = () => {
   const [autoTrading, setAutoTrading] = useState(false);
   const [currentPrice, setCurrentPrice] = useState(1.0847);
   const [showAIModal, setShowAIModal] = useState(false);
+  const navigate = useNavigate();
+
   const [portfolio, setPortfolio] = useState({
     balance: 5000,
     baseCurrency: 'USD',
@@ -209,6 +212,13 @@ const Dashboard = () => {
             <Button variant="outline" size="sm">
               <Settings className="h-4 w-4 mr-2" />
               Settings
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => {
+              try { localStorage.removeItem('demo_user'); } catch (e) { console.warn('logout localStorage remove failed', e); }
+              navigate('/auth');
+            }}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
             </Button>
           </div>
         </div>

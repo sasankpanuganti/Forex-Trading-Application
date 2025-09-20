@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 interface TradingChartProps {
   selectedPair: string;
   currentPrice: number;
+  data?: Array<{ time: string; price: number; sma?: number; volume?: number }>;
 }
 
 // Simulate realistic forex price data with minimal volatility
@@ -41,10 +42,11 @@ const generatePriceData = (currentPrice: number) => {
   return data;
 };
 
-export const TradingChart = ({ selectedPair, currentPrice }: TradingChartProps) => {
-  const data = generatePriceData(currentPrice);
-  const priceChange = data[data.length - 1].price - data[data.length - 2].price;
-  const priceChangePercent = ((priceChange / data[data.length - 2].price) * 100).toFixed(3);
+export const TradingChart = (props: TradingChartProps) => {
+  const { selectedPair, currentPrice, data: incomingData } = props;
+  const data = incomingData && incomingData.length ? incomingData : generatePriceData(currentPrice);
+  const priceChange = data.length > 1 ? data[data.length - 1].price - data[data.length - 2].price : 0;
+  const priceChangePercent = data.length > 1 ? ((priceChange / data[data.length - 2].price) * 100).toFixed(3) : '0.000';
   
   return (
     <Card>

@@ -13,6 +13,10 @@ interface Trade {
   type: 'BUY' | 'SELL';
   amount: number;
   entry_price: number;
+  trading_capacity?: number;
+  settlement_capacity?: number;
+  quantity?: number;
+  best_deal?: number | null;
   exit_price?: number | null;
   status: 'OPEN' | 'CLOSED' | 'PENDING';
   profit: number; // realized profit
@@ -63,18 +67,21 @@ export const TradeBlotter = ({ trades = [], currentPrice, onCloseTrade }: TradeB
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Trade ID</TableHead>
-                <TableHead>Time</TableHead>
-                <TableHead>Pair</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Entry Price</TableHead>
-                <TableHead>Current Price</TableHead>
-                <TableHead>P&L</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Algorithm</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
+                  <TableHead>Trade ID</TableHead>
+                  <TableHead>Time</TableHead>
+                  <TableHead>Pair</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Trading Cap.</TableHead>
+                  <TableHead>Settl. Cap.</TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead>Best Deal (24h)</TableHead>
+                  <TableHead>Entry Price</TableHead>
+                  <TableHead>Current Price</TableHead>
+                  <TableHead>P&L</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Algorithm</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
             </TableHeader>
             <TableBody>
               {trades.map((trade) => (
@@ -95,7 +102,10 @@ export const TradeBlotter = ({ trades = [], currentPrice, onCloseTrade }: TradeB
                       {trade.type}
                     </div>
                   </TableCell>
-                  <TableCell className="font-mono">{trade.amount.toLocaleString()}</TableCell>
+                  <TableCell className="font-mono">{trade.trading_capacity ? trade.trading_capacity.toLocaleString() : trade.amount.toLocaleString()}</TableCell>
+                  <TableCell className="font-mono">{trade.settlement_capacity ? trade.settlement_capacity.toLocaleString() : ''}</TableCell>
+                  <TableCell className="font-mono">{trade.quantity ?? Math.floor(trade.amount)}</TableCell>
+                  <TableCell className="font-mono">{typeof trade.best_deal === 'number' ? trade.best_deal.toFixed(5) : 'No best deal'}</TableCell>
                   <TableCell className="font-mono">
                     {trade.entry_price.toFixed(5)}
                   </TableCell>
@@ -150,7 +160,7 @@ export const TradeBlotter = ({ trades = [], currentPrice, onCloseTrade }: TradeB
         
         {/* Summary Stats */}
         <div className="mt-4 pt-4 border-t border-border">
-          <div className="grid grid-cols-4 gap-4 text-center">
+            <div className="grid grid-cols-4 gap-4 text-center">
             <div>
               <div className="text-sm text-muted-foreground">Open Trades</div>
                 <div className="text-lg font-bold">
