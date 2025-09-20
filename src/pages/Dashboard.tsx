@@ -94,15 +94,12 @@ const Dashboard = () => {
   }, []);
 
   const handleTrade = (type: 'buy' | 'sell', amountOverride?: number) => {
-    const amount = amountOverride ? amountOverride : Number(tradeAmount);
-    if (amount < minTradeAmount) {
-      toast({
-        title: 'Trade Too Small',
-        description: `Minimum trade amount is ${minTradeAmount} ${portfolio.baseCurrency}`,
-      });
-      return;
-    }
-    // Create trade with timestamp and current price
+    const requested = amountOverride ? amountOverride : Number(tradeAmount || 0);
+
+    // If requested amount is less than minimum, use the minimum (user wants to trade at least the min)
+    const executedAmount = requested < minTradeAmount ? minTradeAmount : requested;
+
+    // Create trade with timestamp and current price using executedAmount
     const id = `TXN${Date.now()}`;
     const timestamp = new Date().toISOString();
     const entry_price = currentPrice;
@@ -111,7 +108,7 @@ const Dashboard = () => {
       timestamp,
       pair: selectedPair,
       type: (type === 'buy' ? 'BUY' : 'SELL') as 'BUY' | 'SELL',
-      amount,
+      amount: executedAmount,
       entry_price,
       exit_price: null,
       status: 'OPEN',
@@ -119,18 +116,28 @@ const Dashboard = () => {
       algorithm: 'Manual'
     };
 
+    // Example margin rate: 1% of notional is reserved as used margin
+    const marginUsed = executedAmount * 0.01;
+
+    // compute new balance deterministically so we can update tradeAmount afterwards
     setTrades(prev => [newTrade, ...prev]);
-    setPortfolio(prev => ({
-      ...prev,
-      // assume initial margin used reduces available balance (example margin 1%)
-      balance: prev.balance - (amount * 0.01),
-      openPositions: prev.openPositions + 1,
-      totalTrades: prev.totalTrades + 1
-    }));
+    setPortfolio(prev => {
+      const newBalance = prev.balance - marginUsed;
+      // update tradeAmount input to reflect a sensible next default: keep at least minTradeAmount or available balance
+      const nextTradeAmount = Math.max(minTradeAmount, Math.floor(newBalance));
+      // update the visible input immediately
+      setTradeAmount(String(nextTradeAmount > 0 ? nextTradeAmount : 0));
+      return ({
+        ...prev,
+        balance: newBalance,
+        openPositions: prev.openPositions + 1,
+        totalTrades: prev.totalTrades + 1
+      });
+    });
 
     toast({
       title: `${type.toUpperCase()} Order Executed`,
-      description: `${type === 'buy' ? 'Bought' : 'Sold'} ${amount} ${selectedPair} at ${currentPrice}`,
+      description: `${type === 'buy' ? 'Bought' : 'Sold'} ${executedAmount} ${selectedPair} at ${currentPrice}`,
     });
   };
 

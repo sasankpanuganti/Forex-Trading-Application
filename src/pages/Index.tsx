@@ -43,6 +43,14 @@ const Index = () => {
               >
                 View Demo
               </Button>
+              <Button
+                variant="ghost"
+                size="lg"
+                onClick={() => navigate('/org-dashboard')}
+                className="text-lg px-8 py-3"
+              >
+                Org Dashboard
+              </Button>
             </div>
           </div>
         </div>

@@ -85,3 +85,17 @@ Steps:
 Tables included: `users`, `portfolios`, `trades`, `settings`.
 
 If you want, I can add a small Node.js backend to persist trades to this MySQL database.
+
+## Agent Prediction Server (optional)
+
+An optional demo agent server is included under `server/`. It exposes a prediction API used by the Organization Dashboard.
+
+To run the agent:
+
+```bash
+cd server
+npm install
+npm start
+```
+
+The agent listens on `http://localhost:4001` and exposes `POST /api/agent/predict` with JSON body `{ prices: number[], model?: 'sma'|'rf'|'svm' }` and returns `{ signal, confidence, reason }`.

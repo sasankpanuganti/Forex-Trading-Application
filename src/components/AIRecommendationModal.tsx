@@ -60,8 +60,8 @@ const getReasoningForPair = (pair: string, action: string): string => {
   return reasons[pair as keyof typeof reasons] || 'Technical analysis indicates favorable conditions';
 };
 
-export const AIRecommendationModal = ({ open, onOpenChange, currentPair, portfolio }: AIRecommendationModalProps) => {
-  const [recommendations] = useState(() => generateAIRecommendations(currentPair, portfolio.balance));
+export const AIRecommendationModal = ({ open, onOpenChange, currentPair, portfolio, onApplyRecommendations }: AIRecommendationModalProps) => {
+  const [recommendations] = useState(() => generateAIRecommendations(currentPair, (portfolio?.balance ?? 0)));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -95,9 +95,7 @@ export const TradeBlotter = ({ trades = [], currentPrice, onCloseTrade }: TradeB
                       {trade.type}
                     </div>
                   </TableCell>
-                  <TableCell className="font-mono">
-                    {trade.amount.toLocaleString()}
-                  </TableCell>
+                  <TableCell className="font-mono">{trade.amount.toLocaleString()}</TableCell>
                   <TableCell className="font-mono">
                     {trade.entry_price.toFixed(5)}
                   </TableCell>

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -40,6 +41,24 @@ const Auth = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    try {
+      const demo = localStorage.getItem('demo_user');
+      if (demo) {
+        const parsed = JSON.parse(demo);
+        if (parsed.userType === 'organization') {
+          navigate('/org-dashboard');
+          return;
+        }
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      // ignore
+    }
+  }, [navigate]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -51,8 +70,20 @@ const Auth = () => {
         description: "Welcome to AlphaFxTrader!",
       });
       setIsLoading(false);
-      // Navigate to dashboard - placeholder
-      window.location.href = '/dashboard';
+      // Navigate to appropriate dashboard based on saved demo user
+      try {
+        const demo = localStorage.getItem('demo_user');
+        if (demo) {
+          const parsed = JSON.parse(demo);
+          if (parsed.userType === 'organization') {
+            navigate('/org-dashboard');
+            return;
+          }
+        }
+      } catch (err) {
+        // ignore and fallback
+      }
+      navigate('/dashboard');
     }, 1000);
   };
 
@@ -84,16 +115,23 @@ const Auth = () => {
         description: `Welcome to AlphaFxTrader! Your account has been created with ${formData.baseCurrency} as base currency. Basic trade amount: ${formData.basicTradeAmount}`,
       });
       setIsLoading(false);
-      // Navigate to dashboard - placeholder
+  // Navigate to dashboard - placeholder
       // Save demo user settings in localStorage for demo purposes
   const basicAmt = Number(String(formData.basicTradeAmount).replace(/[^0-9.-]/g, '')) || 0;
       localStorage.setItem('demo_user', JSON.stringify({
         name: formData.name,
         email: formData.email,
         baseCurrency: formData.baseCurrency,
-        basicTradeAmount: basicAmt
+        basicTradeAmount: basicAmt,
+        userType: formData.userType,
+        organizationName: formData.organizationName || null
       }));
-      window.location.href = '/dashboard';
+      // Redirect based on role
+      if (formData.userType === 'organization') {
+        navigate('/org-dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     }, 1000);
   };
 

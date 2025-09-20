@@ -13,10 +13,16 @@ interface PortfolioData {
   totalTrades: number;
 }
 
+interface TradeItem {
+  status: 'OPEN' | 'CLOSED' | 'PENDING';
+  profit?: number;
+  amount?: number;
+}
+
 interface PortfolioProps {
   portfolio: PortfolioData;
   minTradeAmount?: number;
-  trades?: unknown[];
+  trades?: TradeItem[];
 }
 
 export const Portfolio = ({ portfolio, minTradeAmount = 1000, trades = [] }: PortfolioProps) => {
@@ -26,7 +32,9 @@ export const Portfolio = ({ portfolio, minTradeAmount = 1000, trades = [] }: Por
   // compute profits from provided trades
   const closedProfit = trades.filter(t => t.status === 'CLOSED').reduce((s, t) => s + (t.profit || 0), 0);
   const openNotional = trades.filter(t => t.status === 'OPEN').reduce((s, t) => s + (t.amount || 0), 0);
-  const remainingBalance = portfolio.balance + closedProfit - openNotional * 0.01; // assume 1% margin used per open notional
+  // exact reserved margin is 1% of each open trade amount
+  const reservedMargin = openNotional * 0.01;
+  const remainingBalance = portfolio.balance + closedProfit - reservedMargin;
 
   return (
     <Card>
